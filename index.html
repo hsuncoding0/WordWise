@@ -1,267 +1,246 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>多功能英文字典查詢</title>
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#1f2937" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>英文單字查詢工具</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap" rel="stylesheet">
   <style>
+    * { box-sizing: border-box; }
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to right, #eef2f3, #8e9eab);
-      color: #333;
+      font-family: 'Noto Sans TC', sans-serif;
+      background: linear-gradient(to right, #dbeafe, #ffffff);
       margin: 0;
-      padding: 1em;
-      transition: background 0.5s, color 0.5s;
-    }
-    .dark-mode {
-      background: #1e1e1e;
-      color: #eee;
-    }
-    .container {
-      max-width: 800px;
-      margin: auto;
-      background: white;
-      border-radius: 12px;
-      padding: 2em;
-      box-shadow: 0 0 20px rgba(0,0,0,0.2);
-      transition: background 0.5s, color 0.5s;
-    }
-    .dark-mode .container {
-      background: #2c2c2c;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     h1 {
-      text-align: center;
-      color: #4a5568;
+      font-size: 2.2rem;
+      color: #1d4ed8;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(to right, #2563eb, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: fadeInDown 0.6s ease;
+    }
+    .search-box {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      animation: fadeIn 1s ease;
     }
     input[type="text"] {
-      width: 80%;
       padding: 10px;
-      font-size: 1.1em;
-      border-radius: 8px;
+      width: 280px;
       border: 1px solid #ccc;
-      transition: box-shadow 0.3s;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: box-shadow 0.3s ease;
     }
-    input:focus {
+    input[type="text"]:focus {
       outline: none;
-      box-shadow: 0 0 8px #aaa;
+      box-shadow: 0 0 5px #3b82f6;
     }
     button {
-      padding: 10px 20px;
-      margin-left: 10px;
-      font-size: 1em;
-      border: none;
-      border-radius: 8px;
-      background: #4a90e2;
+      background-color: #3b82f6;
       color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
       cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s;
     }
-    .dark-mode button {
-      background: #007acc;
+    button:hover {
+      background-color: #2563eb;
+      transform: scale(1.05);
     }
-    .result {
-      margin-top: 2em;
-      line-height: 1.6;
-      font-size: 1.1em;
+    .result, .history {
+      width: 100%;
+      max-width: 700px;
+      background: white;
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      animation: fadeInUp 0.8s ease;
     }
-    .history, .favorites, .suggestions {
-      margin-top: 1.5em;
-    }
-    .history span, .favorites span, .suggestions span {
-      display: inline-block;
-      margin: 4px;
-      background: #dfe6e9;
-      padding: 5px 10px;
-      border-radius: 20px;
-      cursor: pointer;
-    }
-    .dark-mode .history span,
-    .dark-mode .favorites span,
-    .dark-mode .suggestions span {
-      background: #555;
-      color: #eee;
-    }
-    .phonetics, .part-of-speech, .chinese {
-      margin-top: 1em;
+    .word-title {
+      font-size: 28px;
       font-weight: bold;
+      margin-bottom: 10px;
+      color: #1e40af;
     }
-    .mode-toggle {
-      float: right;
-      cursor: pointer;
-      font-size: 0.9em;
-      color: #666;
+    .phonetics {
+      color: #64748b;
+      margin-bottom: 10px;
     }
-    audio {
-      margin-top: 10px;
+    .part-of-speech {
+      font-weight: bold;
+      margin-top: 15px;
+      color: #0f172a;
+    }
+    ul {
+      padding-left: 20px;
+      color: #374151;
+    }
+    .highlight {
+      background: #fde68a;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+    .chinese {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #10b981;
+    }
+    .example {
+      font-style: italic;
+      color: #6b7280;
+      margin-top: 5px;
     }
     .loading {
-      font-style: italic;
-      animation: pulse 1s infinite;
+      margin-top: 20px;
+      border: 5px solid #ccc;
+      border-top: 5px solid #3b82f6;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
     }
-    @keyframes pulse {
-      0% {opacity: 0.2;}
-      50% {opacity: 1;}
-      100% {opacity: 0.2;}
+    .history h3 {
+      margin-top: 0;
+      font-size: 18px;
+      color: #1f2937;
     }
+    .history-item {
+      display: inline-block;
+      background: #e5e7eb;
+      color: #111827;
+      padding: 6px 10px;
+      margin: 5px 6px 5px 0;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .history-item:hover {
+      background: #cbd5e1;
+    }
+    .clear-btn {
+      margin-top: 10px;
+      font-size: 14px;
+      background: none;
+      color: #ef4444;
+      border: none;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
-  <div class="mode-toggle" onclick="toggleDarkMode()">🌗 切換夜間模式</div>
-  <div class="container">
-    <h1>英文單字查詢工具</h1>
-    <input type="text" id="wordInput" placeholder="輸入英文單字" oninput="showSuggestions()" />
-    <button onclick="lookup()">查詢</button>
-    <div class="suggestions" id="suggestions"></div>
-    <div class="result" id="result"></div>
-    <div class="history" id="history"></div>
-    <div class="favorites" id="favorites"></div>
+  <h1>英文單字查詢工具</h1>
+  <div class="search-box">
+    <input type="text" id="wordInput" placeholder="輸入英文單字" onkeypress="if(event.key==='Enter') lookupWord()" />
+    <button onclick="lookupWord()">查詢</button>
   </div>
+  <div class="result" id="result"></div>
+  <div class="history" id="history"></div>
 
   <script>
-    const wordInput = document.getElementById("wordInput");
     const resultDiv = document.getElementById("result");
     const historyDiv = document.getElementById("history");
-    const favoritesDiv = document.getElementById("favorites");
-    const suggestionsDiv = document.getElementById("suggestions");
 
-    let wordList = ["apple", "banana", "cat", "dog", "elephant", "egypt", "zebra", "zoom", "zero"];
+    async function lookupWord(wordInput = null) {
+      const word = wordInput || document.getElementById("wordInput").value.trim().toLowerCase();
+      resultDiv.innerHTML = '<div class="loading"></div>';
 
-    function toggleDarkMode() {
-      document.body.classList.toggle("dark-mode");
-    }
-
-    function speak(text) {
-      const utter = new SpeechSynthesisUtterance(text);
-      speechSynthesis.speak(utter);
-    }
-
-    function showSuggestions() {
-      const query = wordInput.value.toLowerCase();
-      if (!query) {
-        suggestionsDiv.innerHTML = "";
+      if (!word) {
+        resultDiv.innerHTML = "<p>請輸入一個英文單字</p>";
         return;
-      }
-      const matches = wordList.filter(w => w.startsWith(query));
-      suggestionsDiv.innerHTML = matches.map(w =>
-        `<span onclick="selectSuggestion('${w}')">${w}</span>`
-      ).join("");
-    }
-
-    function selectSuggestion(word) {
-      wordInput.value = word;
-      suggestionsDiv.innerHTML = "";
-      lookup();
-    }
-
-    function renderHistory() {
-      let history = JSON.parse(localStorage.getItem("history") || "[]");
-      if (!history.length) {
-        historyDiv.innerHTML = "";
-        historyDiv.style.display = "none";
-        return;
-      }
-      historyDiv.style.display = "block";
-      historyDiv.innerHTML = "<h3>查詢紀錄</h3>" +
-        history.map(w => `<span onclick="lookupWord('${w}')">${w}</span>`).join("");
-    }
-
-    function renderFavorites() {
-      let fav = JSON.parse(localStorage.getItem("favorites") || "[]");
-      if (!fav.length) {
-        favoritesDiv.innerHTML = "";
-        favoritesDiv.style.display = "none";
-        return;
-      }
-      favoritesDiv.style.display = "block";
-      favoritesDiv.innerHTML = "<h3>收藏單字</h3>" +
-        fav.map(w => `<span onclick="lookupWord('${w}')">${w}</span>`).join("");
-    }
-
-    async function lookup() {
-      const word = wordInput.value.trim();
-      if (!word) return;
-      resultDiv.innerHTML = "<div class='loading'>載入中...</div>";
-      suggestionsDiv.innerHTML = "";
-
-      let history = JSON.parse(localStorage.getItem("history") || "[]");
-      if (!history.includes(word)) {
-        history.unshift(word);
-        localStorage.setItem("history", JSON.stringify(history.slice(0, 30)));
       }
 
       try {
-        const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-        const data = await res.json();
-        if (!Array.isArray(data)) throw new Error();
+        const dictRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+        if (!dictRes.ok) throw new Error("無法取得定義資料");
+        const dictData = await dictRes.json();
 
-        let html = `<h2>${data[0].word} 
-                    <button onclick="speak('${data[0].word}')">🔊</button>
-                    <button onclick="addFavorite('${data[0].word}')">⭐ 收藏</button></h2>`;
-
-        const phon = data[0].phonetics.find(p => p.text || p.audio);
-        if (phon) {
-          html += `<div class="phonetics">${phon.text || ""}
-                   ${phon.audio ? `<audio controls src="${phon.audio}"></audio>` : ""}</div>`;
+        if (!Array.isArray(dictData) || dictData.length === 0 || dictData.title === "No Definitions Found") {
+          resultDiv.innerHTML = "<p>找不到該單字，請確認拼字是否正確。</p>";
+          return;
         }
 
-        for (const meaning of data[0].meanings) {
-          if (!meaning.definitions.length) continue;
+        let html = `<div class='word-title'>${dictData[0].word}</div>`;
 
+        const phonetics = dictData[0].phonetics.find(p => p.text || p.audio);
+        if (phonetics) {
+          html += `<div class='phonetics'>`;
+          if (phonetics.text) html += `音標：${phonetics.text}<br>`;
+          if (phonetics.audio) html += `<audio controls src='${phonetics.audio}'></audio>`;
+          html += `</div>`;
+        }
+
+        dictData[0].meanings.forEach(meaning => {
           html += `<div class="part-of-speech">${meaning.partOfSpeech}</div><ul>`;
-
-          for (const defObj of meaning.definitions.slice(0, 3)) {
-            const engDef = defObj.definition;
-            if (!engDef) continue;
-
-            try {
-              const zhRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-TW&dt=t&q=${encodeURIComponent(engDef)}`);
-              const zhData = await zhRes.json();
-              const zhDef = zhData[0][0][0] || engDef;
-              html += `<li>${zhDef}</li>`;
-            } catch {
-              html += `<li>${engDef}</li>`;
+          meaning.definitions.slice(0, 3).forEach(def => {
+            html += `<li>${highlightWord(def.definition, word)}</li>`;
+            if (def.example) {
+              html += `<div class="example">例句：${highlightWord(def.example, word)}</div>`;
             }
-          }
-
+          });
           html += `</ul>`;
-        }
+        });
+
+        const zhRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-TW&dt=t&q=${encodeURIComponent(word)}`);
+        const zhData = await zhRes.json();
+        const zhTranslation = zhData?.[0]?.[0]?.[0] || "（無翻譯結果）";
+        html += `<div class="chinese">中文翻譯：${zhTranslation}</div>`;
 
         resultDiv.innerHTML = html;
-
-      } catch (err) {
-        resultDiv.innerHTML = "❌ 無法取得資料";
+        saveHistory(word);
+      } catch (error) {
+        resultDiv.innerHTML = "<p>查詢失敗，請稍後再試。</p>";
+        console.error(error);
       }
+    }
 
+    function highlightWord(text, word) {
+      const regex = new RegExp(`(${word})`, 'gi');
+      return text.replace(regex, '<span class="highlight">$1</span>');
+    }
+
+    function saveHistory(word) {
+      let history = JSON.parse(localStorage.getItem("wordHistory") || "[]");
+      if (!history.includes(word)) {
+        history.unshift(word);
+        if (history.length > 10) history.pop();
+        localStorage.setItem("wordHistory", JSON.stringify(history));
+      }
       renderHistory();
-      renderFavorites();
     }
 
-    function lookupWord(word) {
-      wordInput.value = word;
-      lookup();
-    }
-
-    function addFavorite(word) {
-      let fav = JSON.parse(localStorage.getItem("favorites") || "[]");
-      if (!fav.includes(word)) {
-        fav.unshift(word);
-        localStorage.setItem("favorites", JSON.stringify(fav.slice(0, 50)));
-        renderFavorites();
+    function renderHistory() {
+      let history = JSON.parse(localStorage.getItem("wordHistory") || "[]");
+      if (history.length === 0) {
+        historyDiv.innerHTML = '';
+        return;
       }
+      historyDiv.innerHTML = `<h3>查詢紀錄</h3>` +
+        history.map(w => `<span class='history-item' onclick='lookupWord("${w}")'>${w}</span>`).join("") +
+        `<button class="clear-btn" onclick="clearHistory()">清除紀錄</button>`;
     }
 
-    // 初始化
-    renderHistory();
-    renderFavorites();
-  </script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js').then(reg => {
-        console.log('✅ Service Worker 註冊成功', reg);
-      }).catch(err => {
-        console.warn('❌ Service Worker 註冊失敗', err);
-      });
+    function clearHistory() {
+      localStorage.removeItem("wordHistory");
+      renderHistory();
     }
+
+    renderHistory();
   </script>
 </body>
 </html>
