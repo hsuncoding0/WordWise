@@ -1,200 +1,281 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>英文單字查詢</title>
+  <meta charset="UTF-8">
+  <title>多功能英文字典查詢</title>
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#1f2937" />
   <style>
     body {
-      margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
-      transition: background-color 0.4s, color 0.4s;
+      background: linear-gradient(to right, #eef2f3, #8e9eab);
+      color: #333;
+      margin: 0;
+      padding: 1em;
+      transition: background 0.5s, color 0.5s;
     }
-    :root {
-      --bg: #ffffff;
-      --text: #111111;
-      --card: #f3f4f6;
+
+    .dark-mode {
+      background: #1e1e1e;
+      color: #eee;
     }
-    .dark {
-      --bg: #1f2937;
-      --text: #f9fafb;
-      --card: #374151;
-    }
-    header {
-      padding: 1rem;
-      text-align: center;
-      background: var(--card);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
+
     .container {
-      max-width: 600px;
-      margin: 2rem auto;
-      padding: 1rem;
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      border-radius: 12px;
+      padding: 2em;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      transition: background 0.5s, color 0.5s;
     }
-    input {
-      width: 100%;
-      padding: 0.7rem;
-      font-size: 1.1rem;
-      border-radius: 5px;
+
+    .dark-mode .container {
+      background: #2c2c2c;
+    }
+
+    h1 {
+      text-align: center;
+      color: #4a5568;
+    }
+
+    input[type="text"] {
+      width: 80%;
+      padding: 10px;
+      font-size: 1.1em;
+      border-radius: 8px;
       border: 1px solid #ccc;
+      transition: box-shadow 0.3s;
     }
+
+    input:focus {
+      outline: none;
+      box-shadow: 0 0 8px #aaa;
+    }
+
     button {
-      margin-top: 0.5rem;
-      padding: 0.6rem 1rem;
-      font-size: 1rem;
-      cursor: pointer;
-      background-color: #3b82f6;
-      color: white;
+      padding: 10px 20px;
+      margin-left: 10px;
+      font-size: 1em;
       border: none;
-      border-radius: 5px;
-      transition: background 0.3s;
+      border-radius: 8px;
+      background: #4a90e2;
+      color: white;
+      cursor: pointer;
     }
-    button:hover {
-      background-color: #2563eb;
+
+    .dark-mode button {
+      background: #007acc;
     }
-    .suggestions span {
+
+    .result {
+      margin-top: 2em;
+      line-height: 1.6;
+      font-size: 1.1em;
+    }
+
+    .history, .favorites, .suggestions {
+      margin-top: 1.5em;
+    }
+
+    .history span, .favorites span, .suggestions span {
       display: inline-block;
-      background: #e0e7ff;
-      margin: 0.2rem;
-      padding: 0.3rem 0.5rem;
-      border-radius: 4px;
+      margin: 4px;
+      background: #dfe6e9;
+      padding: 5px 10px;
+      border-radius: 20px;
       cursor: pointer;
     }
-    .card {
-      background: var(--card);
-      border-radius: 10px;
-      padding: 1rem;
-      margin-top: 1rem;
+
+    .dark-mode .history span,
+    .dark-mode .favorites span,
+    .dark-mode .suggestions span {
+      background: #555;
+      color: #eee;
     }
-    .night-toggle {
-      position: fixed;
-      top: 1rem;
-      right: 1rem;
-      font-size: 0.9rem;
+
+    .phonetics, .part-of-speech, .chinese {
+      margin-top: 1em;
+      font-weight: bold;
+    }
+
+    .mode-toggle {
+      float: right;
       cursor: pointer;
+      font-size: 0.9em;
+      color: #666;
     }
-    .favorites {
-      margin-top: 2rem;
+
+    audio {
+      margin-top: 10px;
     }
-    .favorites h3 {
-      margin-bottom: 0.5rem;
+
+    .loading {
+      font-style: italic;
+      animation: pulse 1s infinite;
     }
-    .favorites li {
-      list-style: none;
-      margin: 0.3rem 0;
-    }
-    .fade-in {
-      animation: fadeIn 0.4s ease-in;
-    }
-    @keyframes fadeIn {
-      from {opacity: 0;}
-      to {opacity: 1;}
+
+    @keyframes pulse {
+      0% {opacity: 0.2;}
+      50% {opacity: 1;}
+      100% {opacity: 0.2;}
     }
   </style>
 </head>
 <body>
-  <div class="night-toggle" onclick="toggleDarkMode()">🌙 夜間模式</div>
-  <header><h1>英文單字查詢</h1></header>
+  <div class="mode-toggle" onclick="toggleDarkMode()">🌗 切換夜間模式</div>
   <div class="container">
-    <input type="text" id="wordInput" placeholder="輸入英文單字..." oninput="suggestWords()" />
+    <h1>英文單字查詢工具</h1>
+    <input type="text" id="wordInput" placeholder="輸入英文單字" oninput="showSuggestions()">
+    <button onclick="lookup()">查詢</button>
     <div class="suggestions" id="suggestions"></div>
-    <button onclick="lookupWord()">查詢</button>
-    <div id="result" class="card fade-in"></div>
-    <div class="favorites card">
-      <h3>❤️ 收藏單字</h3>
-      <ul id="favoritesList"></ul>
-    </div>
+    <div class="result" id="result"></div>
+    <div class="chinese" id="chinese"></div>
+    <div class="history" id="history"></div>
+    <div class="favorites" id="favorites"></div>
   </div>
 
   <script>
+    const wordInput = document.getElementById("wordInput");
     const resultDiv = document.getElementById("result");
+    const chineseDiv = document.getElementById("chinese");
+    const historyDiv = document.getElementById("history");
+    const favoritesDiv = document.getElementById("favorites");
     const suggestionsDiv = document.getElementById("suggestions");
-    const favoritesList = document.getElementById("favoritesList");
+
+    let wordList = ["apple", "banana", "cat", "dog", "elephant", "egypt", "zebra", "zoom", "zero"];
 
     function toggleDarkMode() {
-      document.body.classList.toggle("dark");
-    }
-
-    function lookupWord() {
-      const word = document.getElementById("wordInput").value.trim();
-      if (!word) return;
-
-      fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
-        .then(res => res.json())
-        .then(data => {
-          if (!Array.isArray(data)) throw new Error("查無資料");
-          const entry = data[0];
-          let html = `<h2>${entry.word}</h2><button onclick="speak('${entry.word}')">🔊 朗讀</button><ul>`;
-          entry.meanings.forEach(m => {
-            html += `<li><strong>${m.partOfSpeech}:</strong> ${m.definitions[0].definition}</li>`;
-          });
-          html += `</ul><button onclick="saveFavorite('${entry.word}')">⭐ 收藏</button>`;
-          resultDiv.innerHTML = html;
-          resultDiv.classList.add("fade-in");
-        })
-        .catch(err => {
-          resultDiv.innerHTML = `<p>❌ 無法取得定義資料，可能查無此字。</p>`;
-        });
+      document.body.classList.toggle("dark-mode");
     }
 
     function speak(text) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = "en-US";
-      speechSynthesis.speak(utterance);
+      const utter = new SpeechSynthesisUtterance(text);
+      speechSynthesis.speak(utter);
     }
 
-    function suggestWords() {
-      const input = document.getElementById("wordInput").value.trim();
+    function showSuggestions() {
+      const query = wordInput.value.toLowerCase();
+      if (!query) {
+        suggestionsDiv.innerHTML = "";
+        return;
+      }
+      const matches = wordList.filter(w => w.startsWith(query));
+      suggestionsDiv.innerHTML = matches.map(w =>
+        `<span onclick="selectSuggestion('${w}')">${w}</span>`
+      ).join("");
+    }
+
+    function selectSuggestion(word) {
+      wordInput.value = word;
       suggestionsDiv.innerHTML = "";
-      if (input.length < 2) return;
-      const suggestions = ["apple", "banana", "cat", "dog", "elephant", "egypt", "energy", "enough"];
-      const matches = suggestions.filter(w => w.startsWith(input.toLowerCase()));
-      matches.forEach(match => {
-        const span = document.createElement("span");
-        span.textContent = match;
-        span.onclick = () => {
-          document.getElementById("wordInput").value = match;
-          suggestionsDiv.innerHTML = "";
-        };
-        suggestionsDiv.appendChild(span);
-      });
+      lookup();
     }
 
-    function saveFavorite(word) {
-      let list = JSON.parse(localStorage.getItem("favorites") || "[]");
-      if (!list.includes(word)) list.push(word);
-      localStorage.setItem("favorites", JSON.stringify(list));
-      renderFavorites();
+    function renderHistory() {
+      let history = JSON.parse(localStorage.getItem("history") || "[]");
+      if (!history.length) {
+        historyDiv.innerHTML = "";
+        historyDiv.style.display = "none";
+        return;
+      }
+      historyDiv.style.display = "block";
+      historyDiv.innerHTML = "<h3>查詢紀錄</h3>" +
+        history.map(w => `<span onclick="lookupWord('${w}')">${w}</span>`).join("");
     }
 
     function renderFavorites() {
-      let list = JSON.parse(localStorage.getItem("favorites") || "[]");
-      favoritesList.innerHTML = "";
-      list.forEach(word => {
-        const li = document.createElement("li");
-        li.textContent = word;
-        li.onclick = () => {
-          document.getElementById("wordInput").value = word;
-          lookupWord();
-        };
-        favoritesList.appendChild(li);
-      });
+      let fav = JSON.parse(localStorage.getItem("favorites") || "[]");
+      if (!fav.length) {
+        favoritesDiv.innerHTML = "";
+        favoritesDiv.style.display = "none";
+        return;
+      }
+      favoritesDiv.style.display = "block";
+      favoritesDiv.innerHTML = "<h3>收藏單字</h3>" +
+        fav.map(w => `<span onclick="lookupWord('${w}')">${w}</span>`).join("");
     }
 
-    // PWA 註冊
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("service-worker.js")
-          .then(reg => console.log("Service Worker registered"))
-          .catch(err => console.error("SW failed", err));
-      });
+    async function lookup() {
+      const word = wordInput.value.trim();
+      if (!word) return;
+      resultDiv.innerHTML = "<div class='loading'>載入中...</div>";
+      chineseDiv.innerHTML = "";
+      suggestionsDiv.innerHTML = "";
+
+      let history = JSON.parse(localStorage.getItem("history") || "[]");
+      if (!history.includes(word)) {
+        history.unshift(word);
+        localStorage.setItem("history", JSON.stringify(history.slice(0, 30)));
+      }
+
+      try {
+        const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+        const data = await res.json();
+        if (!Array.isArray(data)) throw new Error();
+
+        let html = `<h2>${data[0].word} <button onclick="speak('${data[0].word}')">🔊</button>
+                    <button onclick="addFavorite('${data[0].word}')">⭐ 收藏</button></h2>`;
+
+        const phon = data[0].phonetics.find(p => p.text || p.audio);
+        if (phon) {
+          html += `<div class="phonetics">${phon.text || ""}
+                   ${phon.audio ? `<audio controls src="${phon.audio}"></audio>` : ""}</div>`;
+        }
+
+        data[0].meanings.forEach(m => {
+          if (!m.definitions.length) return;
+          html += `<div class="part-of-speech">${m.partOfSpeech}</div><ul>`;
+          m.definitions.slice(0, 3).forEach(d => {
+            if (d.definition) html += `<li>${d.definition}</li>`;
+          });
+          html += `</ul>`;
+        });
+
+        resultDiv.innerHTML = html;
+
+        // 翻譯中文
+        try {
+          const zhRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-TW&dt=t&q=${encodeURIComponent(word)}`);
+          const zhData = await zhRes.json();
+          const zh = zhData[0][0][0];
+          if (zh) chineseDiv.innerHTML = `<strong>中文翻譯：</strong> ${zh}`;
+        } catch {}
+
+      } catch (err) {
+        resultDiv.innerHTML = "❌ 無法取得定義資料";
+      }
+
+      renderHistory();
+      renderFavorites();
     }
 
+    function lookupWord(word) {
+      wordInput.value = word;
+      lookup();
+    }
+
+    function addFavorite(word) {
+      let fav = JSON.parse(localStorage.getItem("favorites") || "[]");
+      if (!fav.includes(word)) {
+        fav.unshift(word);
+        localStorage.setItem("favorites", JSON.stringify(fav.slice(0, 50)));
+        renderFavorites();
+      }
+    }
+
+    // 初始化
+    renderHistory();
     renderFavorites();
   </script>
+  <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js').then(reg => {
+      console.log('✅ Service Worker 註冊成功', reg);
+    }).catch(err => {
+      console.warn('❌ Service Worker 註冊失敗', err);
+    });
+  }
+</script>
 </body>
 </html>
