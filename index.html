@@ -2,249 +2,198 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>WordWise 英單通</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>英文單字查詢</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#1f2937" />
   <style>
-    :root {
-      --bg: #f0f4f8;
-      --text: #1f2937;
-      --card: #ffffff;
-      --primary: #3b82f6;
-      --accent: #10b981;
-    }
-    body.dark {
-      --bg: #1e293b;
-      --text: #f8fafc;
-      --card: #334155;
-      --primary: #60a5fa;
-      --accent: #34d399;
-    }
-
-    * { box-sizing: border-box; }
     body {
-      font-family: 'Noto Sans TC', sans-serif;
-      background: var(--bg);
-      color: var(--text);
       margin: 0;
-      padding: 2rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      transition: background 0.5s, color 0.5s;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      transition: background-color 0.4s, color 0.4s;
     }
-    h1 {
-      margin-bottom: 1rem;
-      animation: fadeInDown 0.8s ease;
+    :root {
+      --bg: #ffffff;
+      --text: #111111;
+      --card: #f3f4f6;
     }
-    .controls {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      animation: fadeIn 1s ease;
-      flex-wrap: wrap;
-      justify-content: center;
+    .dark {
+      --bg: #1f2937;
+      --text: #f9fafb;
+      --card: #374151;
     }
-    input[type="text"] {
-      padding: 10px;
-      width: 240px;
+    header {
+      padding: 1rem;
+      text-align: center;
+      background: var(--card);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .container {
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+    input {
+      width: 100%;
+      padding: 0.7rem;
+      font-size: 1.1rem;
+      border-radius: 5px;
       border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 16px;
     }
-    button, .toggle-btn {
-      background-color: var(--primary);
+    button {
+      margin-top: 0.5rem;
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+      background-color: #3b82f6;
       color: white;
       border: none;
-      padding: 10px 14px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.2s;
+      border-radius: 5px;
+      transition: background 0.3s;
     }
-    button:hover, .toggle-btn:hover {
+    button:hover {
       background-color: #2563eb;
-      transform: scale(1.05);
-    }
-    .result, .history, .favorites {
-      margin-top: 20px;
-      background: var(--card);
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-      max-width: 700px;
-      width: 100%;
-      animation: fadeInUp 0.6s ease;
-    }
-    .word-title {
-      font-size: 24px;
-      font-weight: bold;
-      color: var(--primary);
-    }
-    .phonetics { margin-bottom: 10px; }
-    .part-of-speech {
-      font-weight: bold;
-      margin-top: 12px;
-    }
-    ul {
-      padding-left: 20px;
-    }
-    .chinese {
-      margin-top: 10px;
-      font-weight: bold;
-      color: var(--accent);
-    }
-    .history-item, .fav-item {
-      display: inline-block;
-      background: #e5e7eb;
-      color: #111827;
-      padding: 6px 10px;
-      margin: 4px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    .tts-btn, .fav-btn {
-      margin-top: 10px;
-      margin-right: 10px;
-      background: #64748b;
-    }
-    .tts-btn:hover, .fav-btn:hover {
-      background: #475569;
-    }
-    .suggestions {
-      margin-top: 8px;
-      font-size: 14px;
     }
     .suggestions span {
-      background: #f3f4f6;
-      padding: 4px 8px;
-      margin: 2px;
-      border-radius: 6px;
-      cursor: pointer;
       display: inline-block;
+      background: #e0e7ff;
+      margin: 0.2rem;
+      padding: 0.3rem 0.5rem;
+      border-radius: 4px;
+      cursor: pointer;
     }
-
-    @keyframes fadeIn { from {opacity: 0; transform: translateY(10px);} to {opacity: 1; transform: translateY(0);} }
-    @keyframes fadeInDown { from {opacity: 0; transform: translateY(-20px);} to {opacity: 1; transform: translateY(0);} }
-    @keyframes fadeInUp { from {opacity: 0; transform: translateY(20px);} to {opacity: 1; transform: translateY(0);} }
+    .card {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+    .night-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .favorites {
+      margin-top: 2rem;
+    }
+    .favorites h3 {
+      margin-bottom: 0.5rem;
+    }
+    .favorites li {
+      list-style: none;
+      margin: 0.3rem 0;
+    }
+    .fade-in {
+      animation: fadeIn 0.4s ease-in;
+    }
+    @keyframes fadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
   </style>
 </head>
 <body>
-  <h1><span style="color: var(--primary)">WordWise</span> 英單通</h1>
-  <div class="controls">
-    <input type="text" id="wordInput" placeholder="輸入英文單字" oninput="suggestWords()" onkeypress="if(event.key==='Enter') lookupWord()" />
+  <div class="night-toggle" onclick="toggleDarkMode()">🌙 夜間模式</div>
+  <header><h1>英文單字查詢</h1></header>
+  <div class="container">
+    <input type="text" id="wordInput" placeholder="輸入英文單字..." oninput="suggestWords()" />
+    <div class="suggestions" id="suggestions"></div>
     <button onclick="lookupWord()">查詢</button>
-    <button class="toggle-btn" onclick="toggleDarkMode()">夜間模式</button>
+    <div id="result" class="card fade-in"></div>
+    <div class="favorites card">
+      <h3>❤️ 收藏單字</h3>
+      <ul id="favoritesList"></ul>
+    </div>
   </div>
-  <div class="suggestions" id="suggestions"></div>
-  <div class="result" id="result"></div>
-  <div class="history" id="history"></div>
-  <div class="favorites" id="favorites"></div>
 
   <script>
     const resultDiv = document.getElementById("result");
-    const historyDiv = document.getElementById("history");
-    const favoritesDiv = document.getElementById("favorites");
     const suggestionsDiv = document.getElementById("suggestions");
-
-    let dictionaryCache = {};
+    const favoritesList = document.getElementById("favoritesList");
 
     function toggleDarkMode() {
       document.body.classList.toggle("dark");
     }
 
-    async function lookupWord(input = null) {
-      const word = input || document.getElementById("wordInput").value.trim();
-      if (!word) return (resultDiv.innerHTML = "<p>請輸入單字。</p>");
-      resultDiv.innerHTML = "<p>查詢中...</p>";
+    function lookupWord() {
+      const word = document.getElementById("wordInput").value.trim();
+      if (!word) return;
 
-      try {
-        const dictRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-        if (!dictRes.ok) throw new Error("無法取得定義資料");
-        const data = await dictRes.json();
-        dictionaryCache[word] = data;
-
-        let html = `<div class="word-title">${data[0].word}</div>`;
-        const phon = data[0].phonetics.find(p => p.text || p.audio);
-        if (phon) {
-          html += `<div class="phonetics">${phon.text || ""}<br>
-                   ${phon.audio ? `<audio controls src="${phon.audio}"></audio>` : ""}</div>`;
-        }
-
-        data[0].meanings.forEach(m => {
-          html += `<div class="part-of-speech">${m.partOfSpeech}</div><ul>`;
-          m.definitions.slice(0, 3).forEach(d => {
-            html += `<li>${d.definition}</li>`;
+      fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
+        .then(res => res.json())
+        .then(data => {
+          if (!Array.isArray(data)) throw new Error("查無資料");
+          const entry = data[0];
+          let html = `<h2>${entry.word}</h2><button onclick="speak('${entry.word}')">🔊 朗讀</button><ul>`;
+          entry.meanings.forEach(m => {
+            html += `<li><strong>${m.partOfSpeech}:</strong> ${m.definitions[0].definition}</li>`;
           });
-          html += `</ul>`;
+          html += `</ul><button onclick="saveFavorite('${entry.word}')">⭐ 收藏</button>`;
+          resultDiv.innerHTML = html;
+          resultDiv.classList.add("fade-in");
+        })
+        .catch(err => {
+          resultDiv.innerHTML = `<p>❌ 無法取得定義資料，可能查無此字。</p>`;
         });
-
-        const zhRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-TW&dt=t&q=${encodeURIComponent(word)}`);
-        const zhData = await zhRes.json();
-        const zh = zhData?.[0]?.[0]?.[0] || "（無翻譯）";
-        html += `<div class="chinese">中文翻譯：${zh}</div>`;
-        html += `<button class="tts-btn" onclick="speakWord('${word}')">🔊 朗讀</button>`;
-        html += `<button class="fav-btn" onclick="addFavorite('${word}')">⭐ 收藏</button>`;
-        resultDiv.innerHTML = html;
-
-        saveHistory(word);
-      } catch (err) {
-        resultDiv.innerHTML = "<p>查詢失敗，請稍後再試。</p>";
-        console.error(err);
-      }
     }
 
-    function speakWord(word) {
-      const msg = new SpeechSynthesisUtterance(word);
-      msg.lang = 'en-US';
-      window.speechSynthesis.speak(msg);
+    function speak(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "en-US";
+      speechSynthesis.speak(utterance);
     }
 
     function suggestWords() {
       const input = document.getElementById("wordInput").value.trim();
-      if (!input || input.length < 2) {
-        suggestionsDiv.innerHTML = "";
-        return;
-      }
-      const exampleWords = ["example", "exam", "excellent", "excite", "exercise", "explore", "exit"];
-      const suggestions = exampleWords.filter(w => w.startsWith(input.toLowerCase())).slice(0, 5);
-      suggestionsDiv.innerHTML = suggestions.map(s => `<span onclick="lookupWord('${s}')">${s}</span>`).join("");
+      suggestionsDiv.innerHTML = "";
+      if (input.length < 2) return;
+      const suggestions = ["apple", "banana", "cat", "dog", "elephant", "egypt", "energy", "enough"];
+      const matches = suggestions.filter(w => w.startsWith(input.toLowerCase()));
+      matches.forEach(match => {
+        const span = document.createElement("span");
+        span.textContent = match;
+        span.onclick = () => {
+          document.getElementById("wordInput").value = match;
+          suggestionsDiv.innerHTML = "";
+        };
+        suggestionsDiv.appendChild(span);
+      });
     }
 
-    function saveHistory(word) {
-      let history = JSON.parse(localStorage.getItem("history") || "[]");
-      if (!history.includes(word)) {
-        history.unshift(word);
-        if (history.length > 10) history.pop();
-        localStorage.setItem("history", JSON.stringify(history));
-      }
-      renderHistory();
-    }
-
-    function addFavorite(word) {
-      let fav = JSON.parse(localStorage.getItem("favorites") || "[]");
-      if (!fav.includes(word)) {
-        fav.unshift(word);
-        if (fav.length > 20) fav.pop();
-        localStorage.setItem("favorites", JSON.stringify(fav));
-      }
+    function saveFavorite(word) {
+      let list = JSON.parse(localStorage.getItem("favorites") || "[]");
+      if (!list.includes(word)) list.push(word);
+      localStorage.setItem("favorites", JSON.stringify(list));
       renderFavorites();
     }
 
-    function renderHistory() {
-      let history = JSON.parse(localStorage.getItem("history") || "[]");
-      if (history.length === 0) return historyDiv.innerHTML = "";
-      historyDiv.innerHTML = "<h3>查詢紀錄</h3>" +
-        history.map(w => `<span class="history-item" onclick="lookupWord('${w}')">${w}</span>`).join("");
-    }
-
     function renderFavorites() {
-      let fav = JSON.parse(localStorage.getItem("favorites") || "[]");
-      if (fav.length === 0) return favoritesDiv.innerHTML = "";
-      favoritesDiv.innerHTML = "<h3>收藏單字</h3>" +
-        fav.map(w => `<span class="fav-item" onclick="lookupWord('${w}')">${w}</span>`).join("");
+      let list = JSON.parse(localStorage.getItem("favorites") || "[]");
+      favoritesList.innerHTML = "";
+      list.forEach(word => {
+        const li = document.createElement("li");
+        li.textContent = word;
+        li.onclick = () => {
+          document.getElementById("wordInput").value = word;
+          lookupWord();
+        };
+        favoritesList.appendChild(li);
+      });
     }
 
-    renderHistory();
+    // PWA 註冊
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js")
+          .then(reg => console.log("Service Worker registered"))
+          .catch(err => console.error("SW failed", err));
+      });
+    }
+
     renderFavorites();
   </script>
 </body>
