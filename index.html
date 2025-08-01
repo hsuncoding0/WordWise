@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>多功能英文字典查詢</title>
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#1f2937" />
@@ -14,12 +14,10 @@
       padding: 1em;
       transition: background 0.5s, color 0.5s;
     }
-
     .dark-mode {
       background: #1e1e1e;
       color: #eee;
     }
-
     .container {
       max-width: 800px;
       margin: auto;
@@ -29,16 +27,13 @@
       box-shadow: 0 0 20px rgba(0,0,0,0.2);
       transition: background 0.5s, color 0.5s;
     }
-
     .dark-mode .container {
       background: #2c2c2c;
     }
-
     h1 {
       text-align: center;
       color: #4a5568;
     }
-
     input[type="text"] {
       width: 80%;
       padding: 10px;
@@ -47,12 +42,10 @@
       border: 1px solid #ccc;
       transition: box-shadow 0.3s;
     }
-
     input:focus {
       outline: none;
       box-shadow: 0 0 8px #aaa;
     }
-
     button {
       padding: 10px 20px;
       margin-left: 10px;
@@ -63,21 +56,17 @@
       color: white;
       cursor: pointer;
     }
-
     .dark-mode button {
       background: #007acc;
     }
-
     .result {
       margin-top: 2em;
       line-height: 1.6;
       font-size: 1.1em;
     }
-
     .history, .favorites, .suggestions {
       margin-top: 1.5em;
     }
-
     .history span, .favorites span, .suggestions span {
       display: inline-block;
       margin: 4px;
@@ -86,35 +75,29 @@
       border-radius: 20px;
       cursor: pointer;
     }
-
     .dark-mode .history span,
     .dark-mode .favorites span,
     .dark-mode .suggestions span {
       background: #555;
       color: #eee;
     }
-
     .phonetics, .part-of-speech, .chinese {
       margin-top: 1em;
       font-weight: bold;
     }
-
     .mode-toggle {
       float: right;
       cursor: pointer;
       font-size: 0.9em;
       color: #666;
     }
-
     audio {
       margin-top: 10px;
     }
-
     .loading {
       font-style: italic;
       animation: pulse 1s infinite;
     }
-
     @keyframes pulse {
       0% {opacity: 0.2;}
       50% {opacity: 1;}
@@ -126,11 +109,10 @@
   <div class="mode-toggle" onclick="toggleDarkMode()">🌗 切換夜間模式</div>
   <div class="container">
     <h1>英文單字查詢工具</h1>
-    <input type="text" id="wordInput" placeholder="輸入英文單字" oninput="showSuggestions()">
+    <input type="text" id="wordInput" placeholder="輸入英文單字" oninput="showSuggestions()" />
     <button onclick="lookup()">查詢</button>
     <div class="suggestions" id="suggestions"></div>
     <div class="result" id="result"></div>
-    <div class="chinese" id="chinese"></div>
     <div class="history" id="history"></div>
     <div class="favorites" id="favorites"></div>
   </div>
@@ -138,7 +120,6 @@
   <script>
     const wordInput = document.getElementById("wordInput");
     const resultDiv = document.getElementById("result");
-    const chineseDiv = document.getElementById("chinese");
     const historyDiv = document.getElementById("history");
     const favoritesDiv = document.getElementById("favorites");
     const suggestionsDiv = document.getElementById("suggestions");
@@ -200,7 +181,6 @@
       const word = wordInput.value.trim();
       if (!word) return;
       resultDiv.innerHTML = "<div class='loading'>載入中...</div>";
-      chineseDiv.innerHTML = "";
       suggestionsDiv.innerHTML = "";
 
       let history = JSON.parse(localStorage.getItem("history") || "[]");
@@ -214,7 +194,8 @@
         const data = await res.json();
         if (!Array.isArray(data)) throw new Error();
 
-        let html = `<h2>${data[0].word} <button onclick="speak('${data[0].word}')">🔊</button>
+        let html = `<h2>${data[0].word} 
+                    <button onclick="speak('${data[0].word}')">🔊</button>
                     <button onclick="addFavorite('${data[0].word}')">⭐ 收藏</button></h2>`;
 
         const phon = data[0].phonetics.find(p => p.text || p.audio);
@@ -223,27 +204,32 @@
                    ${phon.audio ? `<audio controls src="${phon.audio}"></audio>` : ""}</div>`;
         }
 
-        data[0].meanings.forEach(m => {
-          if (!m.definitions.length) return;
-          html += `<div class="part-of-speech">${m.partOfSpeech}</div><ul>`;
-          m.definitions.slice(0, 3).forEach(d => {
-            if (d.definition) html += `<li>${d.definition}</li>`;
-          });
+        for (const meaning of data[0].meanings) {
+          if (!meaning.definitions.length) continue;
+
+          html += `<div class="part-of-speech">${meaning.partOfSpeech}</div><ul>`;
+
+          for (const defObj of meaning.definitions.slice(0, 3)) {
+            const engDef = defObj.definition;
+            if (!engDef) continue;
+
+            try {
+              const zhRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-TW&dt=t&q=${encodeURIComponent(engDef)}`);
+              const zhData = await zhRes.json();
+              const zhDef = zhData[0][0][0] || engDef;
+              html += `<li>${zhDef}</li>`;
+            } catch {
+              html += `<li>${engDef}</li>`;
+            }
+          }
+
           html += `</ul>`;
-        });
+        }
 
         resultDiv.innerHTML = html;
 
-        // 翻譯中文
-        try {
-          const zhRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-TW&dt=t&q=${encodeURIComponent(word)}`);
-          const zhData = await zhRes.json();
-          const zh = zhData[0][0][0];
-          if (zh) chineseDiv.innerHTML = `<strong>中文翻譯：</strong> ${zh}`;
-        } catch {}
-
       } catch (err) {
-        resultDiv.innerHTML = "❌ 無法取得定義資料";
+        resultDiv.innerHTML = "❌ 無法取得資料";
       }
 
       renderHistory();
@@ -269,13 +255,13 @@
     renderFavorites();
   </script>
   <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js').then(reg => {
-      console.log('✅ Service Worker 註冊成功', reg);
-    }).catch(err => {
-      console.warn('❌ Service Worker 註冊失敗', err);
-    });
-  }
-</script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js').then(reg => {
+        console.log('✅ Service Worker 註冊成功', reg);
+      }).catch(err => {
+        console.warn('❌ Service Worker 註冊失敗', err);
+      });
+    }
+  </script>
 </body>
 </html>
